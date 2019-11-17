@@ -1,0 +1,150 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LSystemsGenerator : MonoBehaviour
+{
+
+    private string axiom;
+    private string currentString;
+    public LSystemRuleSet.LSystemType systemType;
+    private Dictionary<char, string> rules;
+    [Range(1, 10)]
+    public int iterations;
+    public float stepLength,angle;
+    public Material branchMaterial;
+    private Stack<TransformInfo> transformStack = new Stack<TransformInfo>();
+    public bool generateSystem = false;
+    private bool isGenerating = false;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        LSystemRuleSet ruleSet = new LSystemRuleSet(systemType);
+        rules = ruleSet.getRules();
+        axiom = ruleSet.getAxiom();
+        currentString = axiom;
+        Debug.Log(currentString);
+        Generate(iterations);
+    }
+
+    void createBranch(Vector3 initialPos, Vector3 endPos)
+    {
+
+        GameObject go = new GameObject();
+
+        go.transform.position = initialPos;
+        go.transform.rotation = Quaternion.Euler(new Vector3(-90,0,0));
+        LineRenderer lr = go.AddComponent<LineRenderer>();
+        lr.startWidth = 0.05f *Random.Range(0.75f,1);
+        lr.endWidth = 0.05f * Random.Range(0.75f, 1);
+        lr.alignment = LineAlignment.View;//TransformZ;
+        lr.SetPositions(new Vector3[] {initialPos, endPos});
+        lr.material = branchMaterial;
+        
+
+
+    }
+
+    void processString()
+    {
+        for (int n = 0; n < iterations; n++)
+        {
+            string newString = "";
+            char[] currentStringChar = currentString.ToCharArray();
+
+            for (int i = 0; i < currentStringChar.Length; i++)
+            {
+
+                char currentChar = currentStringChar[i];
+                if (rules.ContainsKey(currentChar))
+                {
+                    newString += rules[currentChar];
+                }
+                else
+                {
+                    newString += currentChar.ToString();
+                }
+
+
+            }
+            currentString = newString;
+            Debug.Log(currentString);
+
+
+        }
+
+    }
+
+    private void FixedUpdate()
+    {
+        if (generateSystem)
+        {
+            if (!isGenerating)
+            {
+                StartCoroutine(Generate(iterations));
+            }
+            generateSystem = false;
+            
+        }
+    }
+
+    IEnumerator Generate(int iterations)
+    {
+
+
+        isGenerating = true;
+        processString();
+        char[] currentCharacters = currentString.ToCharArray();
+
+        for (int i = 0; i < currentCharacters.Length; i++)
+        {
+            char currentChar = currentCharacters[i];
+
+            Vector3 initialPosition;
+            TransformInfo ti;
+            switch (currentChar)
+            {
+                case 'F':
+                    // move forward
+                    initialPosition = transform.position;
+                    float rndLength = stepLength * Random.Range(0.5f, 1.0f);
+                    transform.Translate(Vector3.forward * rndLength);
+                    createBranch(initialPosition, transform.position);
+                    Debug.DrawLine(initialPosition, transform.position, Color.white,10000f,false);
+                    yield return new WaitForEndOfFrame();
+                    break;
+
+                case '-':
+                    // rotate -           
+                    transform.Rotate(Vector3.up * (- angle * Random.Range(0.9f, 1.0f)));
+                    break;
+
+                case '+':
+                    // rotate + 
+                    transform.Rotate(Vector3.up *( angle * Random.Range(0.9f, 1.0f)));
+                    break;
+
+                case '[':
+                    ti = new TransformInfo();
+                    ti.positon = transform.position;
+                    ti.rotation = transform.rotation;
+                    transformStack.Push(ti);
+                    break;
+
+                case ']':
+                    ti = transformStack.Pop();
+                    transform.position = ti.positon ;
+                    transform.rotation =ti.rotation  ;
+             
+                    break;
+
+
+            }
+  
+        }
+        isGenerating = false;
+    }
+
+    
+}
