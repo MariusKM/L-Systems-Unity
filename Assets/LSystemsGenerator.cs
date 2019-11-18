@@ -11,7 +11,7 @@ public class LSystemsGenerator : MonoBehaviour
     private Dictionary<char, string> rules;
     [Range(1, 10)]
     public int iterations;
-    public float stepLength;
+    public float stepLength, scalefac;
     private float angle;
     public Material branchMaterial;
     public Sprite leafSprite;
@@ -27,7 +27,7 @@ public class LSystemsGenerator : MonoBehaviour
         axiom = ruleSet.getAxiom();
         angle = ruleSet.getAngle();
         currentString = axiom;
-        Debug.Log(currentString);
+    
         Generate();
     }
 
@@ -93,7 +93,7 @@ public class LSystemsGenerator : MonoBehaviour
 
             }
             currentString = newString;
-            Debug.Log(currentString);
+        
 
 
         }
@@ -134,6 +134,19 @@ public class LSystemsGenerator : MonoBehaviour
             case LSystemRuleSet.LSystemType.FractalBush:
                 StartCoroutine(generatePlant(currentCharacters));
                 break;
+
+            case LSystemRuleSet.LSystemType.Leaf:
+                StartCoroutine(generatePlant(currentCharacters));
+                break;
+
+            case LSystemRuleSet.LSystemType.Weed:
+                StartCoroutine(generatePlant(currentCharacters));
+         
+                break;
+            case LSystemRuleSet.LSystemType.Sticks:
+                StartCoroutine(generatePlant(currentCharacters));
+                break;
+
         }
 
 
@@ -149,18 +162,35 @@ public class LSystemsGenerator : MonoBehaviour
             char currentChar = currentCharacters[i];
             Vector3 initialPosition;
             TransformInfo ti;
-
+            float rndLength = 0;
             switch (currentChar)
             {
                 case 'F':
                     // move forward
                     initialPosition = transform.position;
-                    float rndLength = stepLength * Random.Range(0.5f, 1.0f);
-                    transform.Translate(Vector3.forward * rndLength);
+                    rndLength = stepLength * Random.Range(0.5f, 1.0f);
+                    transform.Translate(Vector3.forward * stepLength);
                     createBranch(initialPosition, transform.position);
-                    Debug.DrawLine(initialPosition, transform.position, Color.white, 10000f, false);
+                  
                     yield return new WaitForEndOfFrame();
                     break;
+
+              /*  case 'f':
+                    // move forward
+                    initialPosition = transform.position;
+                    rndLength = stepLength * Random.Range(0.5f, 1.0f);
+                    transform.Translate(Vector3.forward * rndLength); 
+                    break;*/
+
+                case '>':
+                    stepLength *= scalefac;
+                
+                    break;
+                case '<':
+                    stepLength /= scalefac;
+
+                    break;
+
 
                 case '-':
                     // rotate -           

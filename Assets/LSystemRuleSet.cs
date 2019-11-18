@@ -15,7 +15,10 @@ public class LSystemRuleSet : MonoBehaviour
         FracatalTree,
         Plant,
         FractalPlant,
-        FractalBush
+        FractalBush,
+        Weed,
+        Leaf,
+        Sticks
 
     }
 
@@ -75,6 +78,28 @@ public class LSystemRuleSet : MonoBehaviour
                 rules.Add('F', " F[+FF][-FF]F[-F][+F]F");
                 this.axiom = "F";
                 this.angle = 35;
+                break;
+            case LSystemType.Weed:
+                rules.Add('F', "FF-[XY]+[XY]");
+                rules.Add('X', "+FY");
+                rules.Add('Y', "-FX");
+                this.axiom = "F";
+                this.angle = 22.5f;
+                break;
+            case LSystemType.Leaf:
+                rules.Add('F', ">F<");
+                rules.Add('a', "F[+x]Fb");
+                rules.Add('b', "F[-y]Fa");
+                rules.Add('x', "a");
+                rules.Add('y', "b");
+                this.axiom = "a";
+                this.angle = 45f;
+                break;
+            case LSystemType.Sticks:
+                rules.Add('F', "FF");
+                rules.Add('X', "F[+X]F[-X]+X");
+                this.axiom = "X";
+                this.angle = 20f;
                 break;
         }
     }
