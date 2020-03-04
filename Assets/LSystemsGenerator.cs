@@ -18,6 +18,11 @@ public class LSystemsGenerator : MonoBehaviour
     private Stack<TransformInfo> transformStack = new Stack<TransformInfo>();
     public bool generateSystem = false;
     private bool isGenerating = false;
+    private bool newBranch;
+    private Transform lastRoot;
+    private Stack<Transform> BranchRoots = new Stack<Transform>();
+    public int branchCounter = 0;
+    int branchIndex;
 
     // Start is called before the first frame update
     void Start()
@@ -35,39 +40,41 @@ public class LSystemsGenerator : MonoBehaviour
     {
 
         GameObject go = new GameObject();
-
         go.transform.position = initialPos;
-        go.transform.rotation = Quaternion.Euler(new Vector3(-90, 0, 0));
+        go.transform.rotation = transform.rotation;
         LineRenderer lr = go.AddComponent<LineRenderer>();
+        if (lastRoot)
+        {
+            go.transform.parent = lastRoot;
+            
+        }
+        if (newBranch)
+        {
+            go.name = "BranchRoot"+ branchCounter;
+            branchCounter++;
+            BranchRoots.Push(go.transform);
+            lastRoot = go.transform;
+        }
         lr.startWidth = 0.05f * Random.Range(0.75f, 1);
         lr.endWidth = 0.05f * Random.Range(0.75f, 1);
         lr.alignment = LineAlignment.View;//TransformZ;
-        lr.SetPositions(new Vector3[] { initialPos, endPos });
+        lr.useWorldSpace = false;
+        lr.SetPositions(new Vector3[] { Vector3.zero, Vector3.forward *stepLength});
         lr.material = branchMaterial;
-
-
-
+        newBranch = false;
     }
 
     void createLeaf( Vector3 endPos)
     {
-
         GameObject go = new GameObject();
-
         go.transform.position = endPos;
         Vector3 scale = go.transform.localScale*1.5f;
-
         go.transform.localScale = scale;
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = leafSprite;
         Color srCol = new Color();
         ColorUtility.TryParseHtmlString("#00FAFF", out srCol);
         sr.color = srCol;
-       
-       
-
-
-
     }
 
     void processString()
@@ -156,7 +163,7 @@ public class LSystemsGenerator : MonoBehaviour
     IEnumerator generatePlant(char[] currentCharacters)
     {
 
-
+ 
         for (int i = 0; i < currentCharacters.Length; i++)
         {
             char currentChar = currentCharacters[i];
@@ -171,8 +178,8 @@ public class LSystemsGenerator : MonoBehaviour
                     rndLength = stepLength * Random.Range(0.5f, 1.0f);
                     transform.Translate(Vector3.forward * stepLength);
                     createBranch(initialPosition, transform.position);
-                  
-                    yield return new WaitForEndOfFrame();
+                    yield return new WaitForFixedUpdate();
+                    //   yield return new WaitForEndOfFrame();
                     break;
 
               /*  case 'f':
@@ -203,23 +210,30 @@ public class LSystemsGenerator : MonoBehaviour
                     break;
 
                 case '[':
+                    newBranch = true;
                     ti = new TransformInfo();
                     ti.positon = transform.position;
                     ti.rotation = transform.rotation;
                     transformStack.Push(ti);
+                    Debug.Break();
                     break;
 
                 case ']':
+                 
+                    lastRoot = BranchRoots.Pop();
                     ti = transformStack.Pop();
                     transform.position = ti.positon;
                     transform.rotation = ti.rotation;
 
+              
                     break;
 
 
             }
+         //   if (currentChar!= '>' && currentChar != '<') Debug.Log(currentChar); 
         }
         isGenerating = false;
+   
 
     }
 
