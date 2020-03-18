@@ -1,0 +1,4 @@
+See how to systematically parse the individual trees & plant
+
+First top layer as parents
+then the next layer etc. etc.

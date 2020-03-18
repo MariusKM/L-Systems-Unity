@@ -76,6 +76,7 @@ public class LSystemRuleSet : MonoBehaviour
                 break;
             case LSystemType.FractalBush:
                 rules.Add('F', " F[+FF][-FF]F[-F][+F]F");
+                //rules.Add('F', "FF[-F][+F]F + F");
                 this.axiom = "F";
                 this.angle = 35;
                 break;

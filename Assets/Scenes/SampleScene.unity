@@ -96,6 +96,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -152,6 +153,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -206,6 +208,7 @@ MonoBehaviour:
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &368175036
 Transform:
   m_ObjectHideFlags: 0
@@ -252,6 +255,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -306,6 +310,7 @@ MonoBehaviour:
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &457191271
 Transform:
   m_ObjectHideFlags: 0
@@ -352,6 +357,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -406,6 +412,7 @@ MonoBehaviour:
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &698302024
 Transform:
   m_ObjectHideFlags: 0
@@ -445,8 +452,9 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
   m_Enabled: 1
-  serializedVersion: 9
+  serializedVersion: 10
   m_Type: 1
+  m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
   m_Range: 10
@@ -741,7 +749,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &1299088140
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -756,6 +764,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -804,12 +813,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   systemType: 4
-  iterations: 4
+  iterations: 1
   stepLength: 0.3
   scalefac: 0
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &1299088142
 Transform:
   m_ObjectHideFlags: 0
@@ -856,6 +866,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -910,6 +921,7 @@ MonoBehaviour:
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &1384297854
 Transform:
   m_ObjectHideFlags: 0
@@ -941,7 +953,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1694173051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -955,12 +967,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   systemType: 6
-  iterations: 10
+  iterations: 3
   stepLength: 0.1
   scalefac: 1.36
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &1694173052
 Transform:
   m_ObjectHideFlags: 0
@@ -989,6 +1002,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1024,6 +1038,54 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1895544965
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1895544967}
+  - component: {fileID: 1895544966}
+  m_Layer: 8
+  m_Name: GameObject (8)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1895544966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1895544965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sharedProfile: {fileID: 11400000, guid: 33f0e1491e6c5d24d97d457e9b29ec28, type: 2}
+  isGlobal: 1
+  blendDistance: 0
+  weight: 1
+  priority: 0
+--- !u!4 &1895544967
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1895544965}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.8151859, y: 2.2429545, z: -0.0000004172325}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2063412411
 GameObject:
   m_ObjectHideFlags: 0
@@ -1057,6 +1119,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5809,6 +5872,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5863,6 +5927,7 @@ MonoBehaviour:
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
+  branchCounter: 0
 --- !u!4 &2140691398
 Transform:
   m_ObjectHideFlags: 0
