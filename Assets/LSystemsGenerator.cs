@@ -20,9 +20,10 @@ public class LSystemsGenerator : MonoBehaviour
     private bool isGenerating = false;
     private bool newBranch;
     public GameObject currentNode;
-    private Stack<GameObject> childNodes = new Stack<GameObject>();
+
     private int nodeCounter = 0;
-    float nodeLength,nodeWdith;
+    float nodeLength;
+    public float nodeWidth;
 
     // Start is called before the first frame update
     void Start()
@@ -32,7 +33,7 @@ public class LSystemsGenerator : MonoBehaviour
         axiom = ruleSet.getAxiom();
         angle = ruleSet.getAngle();
         currentString = axiom;
-     
+        nodeWidth = 0.05f * Random.Range(0.75f, 1);
         Generate();
     }
 
@@ -42,8 +43,8 @@ public class LSystemsGenerator : MonoBehaviour
         LineRenderer lr = currentNode.GetComponent<LineRenderer>();
         if (!lr) lr  = currentNode.AddComponent<LineRenderer>();
 
-        lr.startWidth = nodeWdith;
-        lr.endWidth = nodeWdith;
+        lr.startWidth = nodeWidth;
+        lr.endWidth = nodeWidth;
         lr.alignment = LineAlignment.View;
         lr.useWorldSpace = false;
         Vector3 localEnd = currentNode.transform.InverseTransformPoint(endPos);
@@ -88,7 +89,7 @@ public class LSystemsGenerator : MonoBehaviour
             currentString = newString;
 
         }
-        Debug.Log(currentString);
+  //      Debug.Log(currentString);
 
     }
 
@@ -168,8 +169,7 @@ public class LSystemsGenerator : MonoBehaviour
         if (nodeCounter != 0) Go.transform.parent = currentNode.transform;
         currentNode = Go;
         nodeLength = 0;
-        nodeWdith = 0.05f * Random.Range(0.75f, 1);
-        Debug.Log("!");
+
         nodeCounter++;
     }
 
@@ -187,9 +187,8 @@ public class LSystemsGenerator : MonoBehaviour
             }
 
             char currentChar = currentCharacters[i];
-            Debug.Log(currentChar);
+          //  Debug.Log(currentChar);
 
-            Vector3 initialPosition;
             TransformInfo ti;
             float rndLength = 0;
             switch (currentChar)
@@ -224,33 +223,46 @@ public class LSystemsGenerator : MonoBehaviour
 
                 case '-':
                     // rotate -         
-                    if (nodeLength> 0)createChildNode();
+                    if (nodeLength > 0)
+                    {
+                        nodeWidth /= 1.5f;
+                        createChildNode();
+                    }
                     transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
                     break;
 
                 case '+':
                     // rotate + 
-                    if (nodeLength > 0) createChildNode();
+                    if (nodeLength > 0)
+                    {
+                        nodeWidth /= 1.5f;
+                        createChildNode();
+                    }
                     transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
                     break;
 
                 case '[':
-
-                    ti = new TransformInfo();
+                    /// Try to only use one stack; two might be unneccesaary
+                    if (!currentNode.GetComponent<TransformInfo>()) ti = currentNode.AddComponent<TransformInfo>();
+                    else ti = currentNode.GetComponent<TransformInfo>();
                     ti.positon = transform.position;
                     ti.rotation = transform.rotation;
+                    ti.nodewidth = nodeWidth;
                     transformStack.Push(ti);
-                    childNodes.Push(currentNode);
+
+                    nodeWidth /= 1.5f;
                     createChildNode();
                     break;
 
                 case ']':
 
-                    currentNode = childNodes.Pop();
+                  
              
                     ti = transformStack.Pop();
+                    currentNode = ti.gameObject;
                     transform.position = ti.positon;
                     transform.rotation = ti.rotation;
+                    nodeWidth = ti.nodewidth;
                     break;
 
 

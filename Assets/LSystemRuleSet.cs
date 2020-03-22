@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LSystemRuleSet : MonoBehaviour
+public class LSystemRuleSet 
 {
     private Dictionary<char, string> rules = new Dictionary<char, string>();
     private string axiom;

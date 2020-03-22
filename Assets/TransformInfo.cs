@@ -6,4 +6,5 @@ public class TransformInfo : MonoBehaviour
 {
     public Vector3 positon;
     public Quaternion rotation;
+    public float nodewidth;
 }
