@@ -209,6 +209,8 @@ MonoBehaviour:
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &368175036
 Transform:
@@ -312,6 +314,8 @@ MonoBehaviour:
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &457191271
 Transform:
@@ -415,6 +419,8 @@ MonoBehaviour:
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &698302024
 Transform:
@@ -601,7 +607,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.24, y: 7.8, z: -5}
+  m_LocalPosition: {x: -2, y: 7.8, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -816,13 +822,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   systemType: 4
-  iterations: 3
+  iterations: 2
   stepLength: 0.3
   scalefac: 0
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &1299088142
 Transform:
@@ -832,7 +840,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1299088139}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -7.5, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -926,6 +934,8 @@ MonoBehaviour:
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &1384297854
 Transform:
@@ -972,13 +982,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   systemType: 6
-  iterations: 3
+  iterations: 8
   stepLength: 0.1
   scalefac: 1.36
   branchMaterial: {fileID: 2100000, guid: d913aa81b3892af4bb001438e3bbabd0, type: 2}
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &1694173052
 Transform:
@@ -988,7 +1000,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1694173050}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1.843, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -5934,6 +5946,8 @@ MonoBehaviour:
   leafSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   generateSystem: 1
   currentNode: {fileID: 0}
+  allObjects: []
+  endPoints: []
   nodeWidth: 0
 --- !u!4 &2140691398
 Transform:

@@ -20,14 +20,18 @@ public class LSystemsGenerator : MonoBehaviour
     private bool isGenerating = false;
     private bool newBranch;
     public GameObject currentNode;
-
+    public List<TransformInfo> allObjects = new List<TransformInfo>();
+    public List<Vector3> endPoints = new List<Vector3>();
     private int nodeCounter = 0;
     float nodeLength;
     public float nodeWidth;
+    private Vector3 startPos;
 
     // Start is called before the first frame update
     void Start()
     {
+        startPos = transform.position;
+        Debug.Log(startPos);
         LSystemRuleSet ruleSet = new LSystemRuleSet(systemType);
         rules = ruleSet.getRules();
         axiom = ruleSet.getAxiom();
@@ -37,11 +41,11 @@ public class LSystemsGenerator : MonoBehaviour
         Generate();
     }
 
-    void createBranch( Vector3 endPos)
+    void createBranch(Vector3 endPos)
     {
 
         LineRenderer lr = currentNode.GetComponent<LineRenderer>();
-        if (!lr) lr  = currentNode.AddComponent<LineRenderer>();
+        if (!lr) lr = currentNode.AddComponent<LineRenderer>();
 
         lr.startWidth = nodeWidth;
         lr.endWidth = nodeWidth;
@@ -64,6 +68,108 @@ public class LSystemsGenerator : MonoBehaviour
         Color srCol = new Color();
         ColorUtility.TryParseHtmlString("#00FAFF", out srCol);
         sr.color = srCol;
+    }
+
+    private void sortPoints()
+    {
+      /*  float cutoff = -0.8f;
+        List<TransformInfo> temp = new List<TransformInfo>();
+
+        foreach (TransformInfo t in allObjects)
+        {
+            if (t.nodeLength > cutoff) temp.Add(t);
+        }
+        TransformInfo.TIC comparator = new TransformInfo.TIC();
+        allObjects = temp;
+        allObjects.Sort(comparator);*/
+        endPoints.Add(startPos);
+        foreach (TransformInfo t in allObjects)
+        {
+            if (t.nodeLength > 0) endPoints.Add((t.endPoint != Vector3.zero) ? t.endPoint : t.positon);
+        }
+
+        var convexHull = ConvexHull.compute(endPoints);
+        var convexHull2D = convertPoints2D(convexHull);
+        generateMesh(convexHull, convexHull2D);
+
+    }
+
+    Vector3 getClosest(Vector3 v, List<Vector3> points)
+    {
+        Vector3 closest = new Vector3();
+        float minDist = float.MaxValue;
+        foreach(Vector3 V3 in points)
+        {
+            if (v != V3)
+            {
+                float dist = Vector3.Distance(v, V3);
+                if (dist < minDist)
+                {
+                    closest = V3;
+                    minDist = dist;
+                }
+            }
+           
+
+        }
+        return closest;
+
+
+    }
+
+   
+
+    private List<Vector2> convertPoints2D(List<Vector3> points)
+    {
+        List<Vector2> points2D = new List<Vector2>();
+
+        foreach (Vector3 v3 in points)
+        {
+            Vector2 v2 = v3;
+            points2D.Add(v2);
+        }
+
+        return points2D;
+    }
+    private List<Vector3> convertPoints3D(List<Vector2> points)
+    {
+        List<Vector3> points3D = new List<Vector3>();
+
+        foreach (Vector2 v2 in points)
+        {
+            Vector3 v3 = v2;
+            points3D.Add(v3);
+        }
+
+        return points3D;
+    }
+
+    void generateMesh(List<Vector3> points, List<Vector2> points2D)
+    {
+        // Use the triangulator to get indices for creating triangles
+        Vector2[] vertices2D = points2D.ToArray();
+        Vector3[] vertices = points.ToArray();
+        Triangulator tr = new Triangulator(vertices2D);
+        int[] indices = tr.Triangulate();
+
+        // Create the Vector3 vertices
+
+
+        // Create the mesh
+        Mesh msh = new Mesh();
+        msh.vertices = vertices;
+        msh.triangles = indices;
+        msh.RecalculateNormals();
+        msh.RecalculateBounds();
+
+        // Set up game object with mesh;
+        GameObject GO = new GameObject();
+        GO.transform.parent = currentNode.transform;
+        GO.name = "LeafMesh";
+        GO.AddComponent(typeof(MeshRenderer));
+        MeshFilter filter = GO.AddComponent(typeof(MeshFilter)) as MeshFilter;
+        filter.mesh = msh;
+
     }
 
     void processString()
@@ -89,7 +195,7 @@ public class LSystemsGenerator : MonoBehaviour
             currentString = newString;
 
         }
-  //      Debug.Log(currentString);
+        //      Debug.Log(currentString);
 
     }
 
@@ -145,20 +251,6 @@ public class LSystemsGenerator : MonoBehaviour
 
     }
 
-    private bool isBranch(char[] currentCharacters, int index, int range)
-    {
-
-        int rangeIndex = index + range;
-        if (rangeIndex > currentCharacters.Length) rangeIndex = currentCharacters.Length;
-
-        for (int i = index + 1; i < rangeIndex; i++)
-        {
-            if (currentCharacters[i] == ']') return false;
-            if (currentCharacters[i] == 'F') return true;
-        }
-        return false;
-    }
-
     private void createChildNode()
     {
 
@@ -168,6 +260,12 @@ public class LSystemsGenerator : MonoBehaviour
         Go.name = "ChildNode " + nodeCounter;
         if (nodeCounter != 0) Go.transform.parent = currentNode.transform;
         currentNode = Go;
+        if (!currentNode.GetComponent<TransformInfo>())
+        {
+            TransformInfo ti = currentNode.AddComponent<TransformInfo>();
+            allObjects.Add(ti);
+        }
+
         nodeLength = 0;
 
         nodeCounter++;
@@ -176,18 +274,16 @@ public class LSystemsGenerator : MonoBehaviour
     IEnumerator generatePlant(char[] currentCharacters)
     {
 
-
         for (int i = 0; i < currentCharacters.Length; i++)
         {
 
             if (currentNode == null)
             {
-
                 createChildNode();
             }
 
             char currentChar = currentCharacters[i];
-          //  Debug.Log(currentChar);
+            //  Debug.Log(currentChar);
 
             TransformInfo ti;
             float rndLength = 0;
@@ -196,11 +292,15 @@ public class LSystemsGenerator : MonoBehaviour
                 case 'F':
                     // move forward
                     rndLength = stepLength * Random.Range(0.5f, 1.0f);
-              
+
                     nodeLength += rndLength;
-                    transform.Translate(Vector3.forward * stepLength);
+                    transform.Translate(Vector3.forward * rndLength);
+                  //  transform.position = new Vector3(transform.position.x, transform.position.y, startPos.z);
+                    ti = currentNode.GetComponent<TransformInfo>();
+                    ti.endPoint = transform.position;
+                    ti.nodeLength = nodeLength;
                     createBranch(transform.position);
-                
+
                     yield return new WaitForFixedUpdate();
                     break;
 
@@ -242,12 +342,13 @@ public class LSystemsGenerator : MonoBehaviour
                     break;
 
                 case '[':
-                    /// Try to only use one stack; two might be unneccesaary
-                    if (!currentNode.GetComponent<TransformInfo>()) ti = currentNode.AddComponent<TransformInfo>();
-                    else ti = currentNode.GetComponent<TransformInfo>();
+
+
+                    ti = currentNode.GetComponent<TransformInfo>();
                     ti.positon = transform.position;
                     ti.rotation = transform.rotation;
-                    ti.nodewidth = nodeWidth;
+                    ti.nodeWidth = nodeWidth;
+                 
                     transformStack.Push(ti);
 
                     nodeWidth /= 1.5f;
@@ -256,22 +357,21 @@ public class LSystemsGenerator : MonoBehaviour
 
                 case ']':
 
-                  
-             
+
                     ti = transformStack.Pop();
                     currentNode = ti.gameObject;
                     transform.position = ti.positon;
                     transform.rotation = ti.rotation;
-                    nodeWidth = ti.nodewidth;
+                    nodeWidth = ti.nodeWidth;
+                    nodeLength = ti.nodeLength;
                     break;
 
 
             }
             //  if (currentChar!= '>' && currentChar != '<') Debug.Log(currentChar); 
         }
+        sortPoints();
         isGenerating = false;
-
-
     }
 
 
@@ -293,7 +393,7 @@ public class LSystemsGenerator : MonoBehaviour
                     initialPosition = transform.position;
                     rndLength = stepLength * Random.Range(0.5f, 1.0f);
                     transform.Translate(Vector3.forward * rndLength);
-                 //   createBranch(initialPosition, transform.position);
+                    //   createBranch(initialPosition, transform.position);
                     createLeaf(transform.position);
 
                     yield return new WaitForEndOfFrame();
@@ -338,4 +438,13 @@ public class LSystemsGenerator : MonoBehaviour
         isGenerating = false;
 
     }
+
+   /* public class V3C : IComparer<Vector3>
+    {
+        public int Compare(Vector3 x, Vector3 y)
+        {
+
+
+        }
+    }*/
 }
