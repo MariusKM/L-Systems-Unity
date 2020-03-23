@@ -3,8 +3,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 
-namespace TheTide.utils
-{
+
     [ExecuteInEditMode]
     [RequireComponent(typeof(MeshFilter))]
     public class SerializeMesh : MonoBehaviour
@@ -88,4 +87,3 @@ namespace TheTide.utils
         }
     }
 #endif
-}

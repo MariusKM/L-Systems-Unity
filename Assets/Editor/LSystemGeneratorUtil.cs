@@ -21,5 +21,10 @@ public class LSystemGeneratorUtil : Editor
         {
             myScript.saveLastAsPrefab();
         }
+
+        if (GUILayout.Button("Add Colliders"))
+        {
+            myScript.initColliders();
+        }
     }
 }

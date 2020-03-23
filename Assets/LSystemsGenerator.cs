@@ -22,6 +22,7 @@ public class LSystemsGenerator : MonoBehaviour
     private GameObject currentNode;
     private List<TransformInfo> allObjects = new List<TransformInfo>();
     private List<Vector3> endPoints = new List<Vector3>();
+    private List<BoxCollider> colliders = new List<BoxCollider>();
     private int nodeCounter = 0;
     float nodeLength;
     public float nodeWidth;
@@ -155,7 +156,20 @@ public class LSystemsGenerator : MonoBehaviour
 
     }
 
+    public void initColliders()
+    {
 
+
+        foreach (TransformInfo t in allObjects)
+        {
+            GameObject g = t.gameObject;
+            BoxCollider collider = g.AddComponent<BoxCollider>();
+            collider.size = new Vector3(t.nodeWidth, 0.1f, t.nodeLength);
+            colliders.Add(collider);
+
+        }
+
+    }
 
     private List<Vector2> convertPoints2D(List<Vector3> points)
     {
@@ -209,6 +223,7 @@ public class LSystemsGenerator : MonoBehaviour
         MeshRenderer mR = GO.GetComponent<MeshRenderer>();
         mR.material = branchMaterial;
         filter.sharedMesh = msh;
+        GO.AddComponent<SerializeMesh>();
       /*  ObjExporter.MeshToFile(filter, "Assets/Prefabs/Meshes/"+generatedObject.name+".obj");
         msh = FastObjImporter.Instance.ImportFile("Assets/Prefabs/Meshes/" + generatedObject.name + ".obj");
         filter.sharedMesh = msh;*/
@@ -316,9 +331,10 @@ public class LSystemsGenerator : MonoBehaviour
         if (!currentNode.GetComponent<TransformInfo>())
         {
             TransformInfo ti = currentNode.AddComponent<TransformInfo>();
+            ti.nodeWidth = nodeWidth;
             allObjects.Add(ti);
         }
-
+       
         nodeLength = 0;
 
         nodeCounter++;
