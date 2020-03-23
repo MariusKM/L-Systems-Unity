@@ -403,6 +403,7 @@ public class LSystemsGenerator : MonoBehaviour
                         createChildNode();
                     }
                     transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
+                    currentNode.transform.rotation = transform.rotation;
                     break;
 
                 case '+':
@@ -413,6 +414,7 @@ public class LSystemsGenerator : MonoBehaviour
                         createChildNode();
                     }
                     transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
+                    currentNode.transform.rotation = transform.rotation;
                     break;
 
                 case '[':
