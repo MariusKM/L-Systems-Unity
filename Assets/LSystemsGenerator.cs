@@ -25,7 +25,10 @@ public class LSystemsGenerator : MonoBehaviour
     private List<BoxCollider> colliders = new List<BoxCollider>();
     private int nodeCounter = 0;
     float nodeLength;
-    public float nodeWidth;
+    public float branchWidth = 0.05f;
+    public float widthMod = 0.75f;
+    private float nodeWidth;
+    
     private Vector3 startPos;
     private bool isleaf = false;
     [HideInInspector]
@@ -34,7 +37,7 @@ public class LSystemsGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Init();
+      //  Init();
     }
 
     public void Init()
@@ -49,7 +52,7 @@ public class LSystemsGenerator : MonoBehaviour
         axiom = ruleSet.getAxiom();
         angle = ruleSet.getAngle();
         currentString = axiom;
-        nodeWidth = 0.05f * Random.Range(0.75f, 1);
+        nodeWidth = branchWidth * Random.Range(0.75f, 1);
         Generate();
         transform.position = startPos;
     }
@@ -169,6 +172,41 @@ public class LSystemsGenerator : MonoBehaviour
 
         }
 
+    }
+
+    public void setUpPhysics()
+    {
+        foreach (TransformInfo t in allObjects)
+        {
+            GameObject g = t.gameObject;
+            Rigidbody rB = g.AddComponent<Rigidbody>();
+            if (g == generatedObject)
+            {
+                rB.useGravity = false;
+                rB.isKinematic = true;
+            }
+            else
+            {
+                HingeJoint hingeJoint = g.AddComponent<HingeJoint>();
+                rB.mass = 0.06f;
+                rB.angularDrag = 0.5f;
+                hingeJoint.anchor = Vector3.zero;
+                hingeJoint.axis = Vector3.up;
+                hingeJoint.connectedBody = g.transform.parent.GetComponent<Rigidbody>();
+                hingeJoint.useLimits = true;
+                JointLimits limits = new JointLimits();
+                limits.min =  0 - (0.56f * angle);
+                limits.max = 0 + (0.44f * angle);
+                limits.bounciness = 0;
+                limits.bounceMinVelocity = 0.5f;
+                limits.contactDistance = 15f;
+                hingeJoint.enableCollision = false;
+                hingeJoint.limits = limits;
+            }
+          
+
+
+        }
     }
 
     private List<Vector2> convertPoints2D(List<Vector3> points)
@@ -399,7 +437,7 @@ public class LSystemsGenerator : MonoBehaviour
                     // rotate -         
                     if (nodeLength > 0)
                     {
-                        nodeWidth /= 1.5f;
+                        nodeWidth *= widthMod;
                         createChildNode();
                     }
                     transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
@@ -410,7 +448,7 @@ public class LSystemsGenerator : MonoBehaviour
                     // rotate + 
                     if (nodeLength > 0)
                     {
-                        nodeWidth /= 1.5f;
+                        nodeWidth *= widthMod;
                         createChildNode();
                     }
                     transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
@@ -427,7 +465,7 @@ public class LSystemsGenerator : MonoBehaviour
 
                     transformStack.Push(ti);
 
-                    nodeWidth /= 1.5f;
+                    nodeWidth *= widthMod;
                     createChildNode();
                     break;
 

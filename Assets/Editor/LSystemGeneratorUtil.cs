@@ -25,6 +25,7 @@ public class LSystemGeneratorUtil : Editor
         if (GUILayout.Button("Add Colliders"))
         {
             myScript.initColliders();
+            myScript.setUpPhysics();
         }
     }
 }
