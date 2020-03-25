@@ -176,6 +176,11 @@ public class LSystemsGenerator : MonoBehaviour
 
     public void setUpPhysics()
     {
+
+        float maxMass = 0;
+        float maxLength = 0;
+        float maxWidth = 0;
+         
         foreach (TransformInfo t in allObjects)
         {
             GameObject g = t.gameObject;
@@ -183,12 +188,18 @@ public class LSystemsGenerator : MonoBehaviour
             if (g == generatedObject)
             {
                 rB.useGravity = false;
+                maxMass = rB.mass;
+                maxLength = t.nodeLength;
+                maxWidth = t.nodeWidth;
                 rB.isKinematic = true;
             }
             else
             {
                 HingeJoint hingeJoint = g.AddComponent<HingeJoint>();
-                rB.mass = 0.06f;
+                float nodeLenFac = (t.nodeLength / maxLength);
+                float nodeWdithFac = (t.nodeWidth / maxWidth);
+                rB.mass = (nodeLenFac + nodeWdithFac) / (maxMass * 2);
+                rB.useGravity = false;
                 rB.angularDrag = 0.5f;
                 hingeJoint.anchor = Vector3.zero;
                 hingeJoint.axis = Vector3.up;
