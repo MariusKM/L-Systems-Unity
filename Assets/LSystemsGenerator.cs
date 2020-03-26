@@ -28,7 +28,7 @@ public class LSystemsGenerator : MonoBehaviour
     public float branchWidth = 0.05f;
     public float widthMod = 0.75f;
     private float nodeWidth;
-    
+
     private Vector3 startPos;
     private bool isleaf = false;
     [HideInInspector]
@@ -37,7 +37,7 @@ public class LSystemsGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-      //  Init();
+        //  Init();
     }
 
     public void Init()
@@ -45,7 +45,7 @@ public class LSystemsGenerator : MonoBehaviour
         currentNode = null;
         Reset();
         startPos = transform.position;
-        Debug.Log(startPos);
+
         LSystemRuleSet ruleSet = new LSystemRuleSet(systemType);
         if (systemType == LSystemRuleSet.LSystemType.Leaf) isleaf = true;
         rules = ruleSet.getRules();
@@ -55,6 +55,7 @@ public class LSystemsGenerator : MonoBehaviour
         nodeWidth = branchWidth * Random.Range(0.75f, 1);
         Generate();
         transform.position = startPos;
+        transform.rotation = Quaternion.Euler(new Vector3(-90, 0, 0));
     }
 
     private void Reset()
@@ -166,9 +167,13 @@ public class LSystemsGenerator : MonoBehaviour
         foreach (TransformInfo t in allObjects)
         {
             GameObject g = t.gameObject;
-            BoxCollider collider = g.AddComponent<BoxCollider>();
-            collider.size = new Vector3(t.nodeWidth, 0.1f, t.nodeLength);
-            colliders.Add(collider);
+            if (t.nodeLength > 0)
+            {
+                BoxCollider collider = g.AddComponent<BoxCollider>();
+                collider.size = new Vector3(t.nodeWidth, 0.01f, t.nodeLength);
+                colliders.Add(collider);
+            }
+
 
         }
 
@@ -180,41 +185,61 @@ public class LSystemsGenerator : MonoBehaviour
         float maxMass = 0;
         float maxLength = 0;
         float maxWidth = 0;
-         
+        GameObject groundPlane = GameObject.Find("GroundPlane");
         foreach (TransformInfo t in allObjects)
         {
             GameObject g = t.gameObject;
-            Rigidbody rB = g.AddComponent<Rigidbody>();
-            if (g == generatedObject)
+
+            g.layer = 9;
+
+
+            if (t.nodeLength > 0)
             {
-                rB.useGravity = false;
-                maxMass = rB.mass;
-                maxLength = t.nodeLength;
-                maxWidth = t.nodeWidth;
-                rB.isKinematic = true;
-            }
-            else
-            {
+                Rigidbody rB = g.AddComponent<Rigidbody>();
                 HingeJoint hingeJoint = g.AddComponent<HingeJoint>();
-                float nodeLenFac = (t.nodeLength / maxLength);
-                float nodeWdithFac = (t.nodeWidth / maxWidth);
-                rB.mass = (nodeLenFac + nodeWdithFac) / (maxMass * 2);
+
+                if (g == generatedObject)
+                {
+                         
+                    maxMass = rB.mass;
+                    maxLength = t.nodeLength;
+                    maxWidth = t.nodeWidth;
+                    hingeJoint.connectedBody = groundPlane.GetComponent<Rigidbody>();
+
+                }
+                else
+                {
+                    float nodeLenFac = (t.nodeLength / maxLength);
+                    float nodeWdithFac = (t.nodeWidth / maxWidth);
+                    rB.mass = (nodeLenFac + nodeWdithFac) / (maxMass * 2) / 10;
+                    hingeJoint.connectedBody = (g.transform.parent.GetComponent<Rigidbody>() == null) ? g.transform.parent.transform.parent.GetComponent<Rigidbody>() : g.transform.parent.GetComponent<Rigidbody>();
+                }
+
                 rB.useGravity = false;
                 rB.angularDrag = 0.5f;
                 hingeJoint.anchor = Vector3.zero;
                 hingeJoint.axis = Vector3.up;
-                hingeJoint.connectedBody = g.transform.parent.GetComponent<Rigidbody>();
+              
+                hingeJoint.useSpring = false;
+                JointSpring jointSpring = new JointSpring();
+                jointSpring.spring = 0.1f;
+                // Debug.Log(g.transform.localRotation.y);
+                //  Debug.Log(g.transform.localRotation.eulerAngles.y);
+                jointSpring.targetPosition = g.transform.localRotation.eulerAngles.y;
+                jointSpring.damper = 0.5f;
+                hingeJoint.spring = jointSpring;
                 hingeJoint.useLimits = true;
                 JointLimits limits = new JointLimits();
-                limits.min =  0 - (0.56f * angle);
+                limits.min = 0 - (0.56f * angle);
                 limits.max = 0 + (0.44f * angle);
-                limits.bounciness = 0;
-                limits.bounceMinVelocity = 0.5f;
-                limits.contactDistance = 15f;
+                limits.bounciness = 0.000f;
+                limits.bounceMinVelocity = 0.0f;
+                limits.contactDistance = 5f;
                 hingeJoint.enableCollision = false;
                 hingeJoint.limits = limits;
             }
-          
+
+
 
 
         }
@@ -273,9 +298,9 @@ public class LSystemsGenerator : MonoBehaviour
         mR.material = branchMaterial;
         filter.sharedMesh = msh;
         GO.AddComponent<SerializeMesh>();
-      /*  ObjExporter.MeshToFile(filter, "Assets/Prefabs/Meshes/"+generatedObject.name+".obj");
-        msh = FastObjImporter.Instance.ImportFile("Assets/Prefabs/Meshes/" + generatedObject.name + ".obj");
-        filter.sharedMesh = msh;*/
+        /*  ObjExporter.MeshToFile(filter, "Assets/Prefabs/Meshes/"+generatedObject.name+".obj");
+          msh = FastObjImporter.Instance.ImportFile("Assets/Prefabs/Meshes/" + generatedObject.name + ".obj");
+          filter.sharedMesh = msh;*/
 
 
     }
@@ -368,7 +393,7 @@ public class LSystemsGenerator : MonoBehaviour
         if (nodeCounter == 0)
         {
             generatedObject = Go;
-            Go.name = systemType.ToString()+Random.seed;
+            Go.name = systemType.ToString() + Random.seed;
         }
         else
         {
@@ -383,7 +408,7 @@ public class LSystemsGenerator : MonoBehaviour
             ti.nodeWidth = nodeWidth;
             allObjects.Add(ti);
         }
-       
+
         nodeLength = 0;
 
         nodeCounter++;
