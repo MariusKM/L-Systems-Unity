@@ -197,7 +197,7 @@ public class LSystemsGenerator : MonoBehaviour
             {
                 Rigidbody rB = g.AddComponent<Rigidbody>();
                 HingeJoint hingeJoint = g.AddComponent<HingeJoint>();
-
+                g.AddComponent<RigidBodyOverride>();
                 if (g == generatedObject)
                 {
                          
@@ -217,6 +217,7 @@ public class LSystemsGenerator : MonoBehaviour
 
                 rB.useGravity = false;
                 rB.angularDrag = 0.5f;
+                rB.drag = 1;
                 hingeJoint.anchor = Vector3.zero;
                 hingeJoint.axis = Vector3.up;
               
