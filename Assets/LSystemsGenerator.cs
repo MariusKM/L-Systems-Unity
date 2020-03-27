@@ -230,6 +230,8 @@ public class LSystemsGenerator : MonoBehaviour
                 jointSpring.damper = 0.5f;
                 hingeJoint.spring = jointSpring;
                 hingeJoint.useLimits = true;
+                hingeJoint.breakForce = 150;
+                hingeJoint.breakTorque = 150;
                 JointLimits limits = new JointLimits();
                 limits.min = 0 - (0.56f * angle);
                 limits.max = 0 + (0.44f * angle);
