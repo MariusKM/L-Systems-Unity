@@ -115,16 +115,6 @@ public class LSystemsGenerator : MonoBehaviour
 
     private void sortPoints()
     {
-        /*  float cutoff = -0.8f;
-          List<TransformInfo> temp = new List<TransformInfo>();
-
-          foreach (TransformInfo t in allObjects)
-          {
-              if (t.nodeLength > cutoff) temp.Add(t);
-          }
-          TransformInfo.TIC comparator = new TransformInfo.TIC();
-          allObjects = temp;
-          allObjects.Sort(comparator);*/
         endPoints.Add(startPos);
         foreach (TransformInfo t in allObjects)
         {
@@ -152,8 +142,6 @@ public class LSystemsGenerator : MonoBehaviour
                     minDist = dist;
                 }
             }
-
-
         }
         return closest;
 
@@ -162,8 +150,6 @@ public class LSystemsGenerator : MonoBehaviour
 
     public void initColliders()
     {
-
-
         foreach (TransformInfo t in allObjects)
         {
             GameObject g = t.gameObject;
@@ -173,8 +159,6 @@ public class LSystemsGenerator : MonoBehaviour
                 collider.size = new Vector3(t.nodeWidth, 0.01f, t.nodeLength);
                 colliders.Add(collider);
             }
-
-
         }
 
     }
@@ -205,6 +189,7 @@ public class LSystemsGenerator : MonoBehaviour
                     maxLength = t.nodeLength;
                     maxWidth = t.nodeWidth;
                     hingeJoint.connectedBody = groundPlane.GetComponent<Rigidbody>();
+                
 
                 }
                 else
@@ -235,8 +220,8 @@ public class LSystemsGenerator : MonoBehaviour
                 JointLimits limits = new JointLimits();
                 limits.min = 0 - (0.56f * angle);
                 limits.max = 0 + (0.44f * angle);
-                limits.bounciness = 0.000f;
-                limits.bounceMinVelocity = 0.0f;
+                limits.bounciness = 0.1f;
+                limits.bounceMinVelocity = 0.1f;
                 limits.contactDistance = 5f;
                 hingeJoint.enableCollision = false;
                 hingeJoint.limits = limits;
