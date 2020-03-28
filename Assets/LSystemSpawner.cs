@@ -7,15 +7,17 @@ public class LSystemSpawner : MonoBehaviour
 
     BoxCollider spawnArea;
     public int amountX, amountZ;
+    public float randomize = 0.0f;
     Bounds spawnBounds;
-
-    public GameObject[] generatedObjects;
+    private bool isRandom;
+    GameObject[] generatedObjects;
     public LSystemsGenerator[] generatorTemplate;
 
 
 
     public void Init()
     {
+        if (randomize > 0.0f) isRandom = true;
         spawnArea = GetComponent<BoxCollider>();
         spawnArea.isTrigger = true;
         spawnBounds = spawnArea.bounds;
@@ -25,7 +27,6 @@ public class LSystemSpawner : MonoBehaviour
 
     void generateFractals()
     {
-       
         for (int i = 0; i < generatedObjects.Length; i++)
         {
             int indexer = Random.Range(0, generatorTemplate.Length);
@@ -35,7 +36,6 @@ public class LSystemSpawner : MonoBehaviour
             generatedObjects[i] = generatorTemplate[indexer].generatedObject;
             generatedObjects[i].transform.parent = this.transform;
         }
-
     }
 
     void cacheChildren()
@@ -51,14 +51,10 @@ public class LSystemSpawner : MonoBehaviour
     {
         cacheChildren();
         for (int i = 1; i < generatedObjects.Length; i++)
-        {
-           
+        {  
             DestroyImmediate(generatedObjects[i]);
         }
-
         generatedObjects = null;
-
-
     }
     // Update is called once per frame
     public void Spawn()
@@ -69,19 +65,27 @@ public class LSystemSpawner : MonoBehaviour
 
         float stepX = sizeX / (amountX-1);
         float stepZ = sizeZ / (amountZ-1);
-        Debug.Log(stepX);
-        Debug.Log(stepZ);
+ 
 
         Vector3 bottomLeft = new Vector3(-sizeX / 2.0f, 0, -sizeZ/2.0f );
         for (int i = 0, z = 0; z <amountZ; z++)
         {
             for (int x = 0; x <amountX; x++,i++)
             {
-                Vector3 spawnPos = bottomLeft + new Vector3(stepX * x, 0, stepZ * z);
-                Debug.Log(spawnPos);
-                Debug.Log(x);
-                Debug.Log(z);
-                Debug.Log(z * amountZ + x+z);
+                Vector3 spawnPos = bottomLeft;
+                if (isRandom)
+                {
+                    Vector3 randomOffset = Random.onUnitSphere * randomize;
+
+                    spawnPos += randomOffset +  new Vector3(stepX * x, 0, stepZ * z);
+
+                }
+                else
+                {
+                    spawnPos += new Vector3(stepX * x, 0, stepZ * z);
+                }
+          
+      
      
                 generatedObjects[i].transform.localPosition = spawnPos;
             
