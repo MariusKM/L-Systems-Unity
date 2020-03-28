@@ -76,8 +76,9 @@ public class LSystemSpawner : MonoBehaviour
                 if (isRandom)
                 {
                     Vector3 randomOffset = Random.onUnitSphere * randomize;
+                    Vector3 off = new Vector3(randomOffset.x, 0, randomOffset.z);
 
-                    spawnPos += randomOffset +  new Vector3(stepX * x, 0, stepZ * z);
+                    spawnPos += off +  new Vector3(stepX * x, 0, stepZ * z);
 
                 }
                 else

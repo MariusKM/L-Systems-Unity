@@ -13,13 +13,16 @@ public class RigidBodyOverride : MonoBehaviour
     private float fadeSpeed = 0.001f;
     private Color originalCol;
     private LineRenderer LR;
+    bool isLeaf = false;
 
 
     void Start()
     {
+        if (tag == "Leaf") isLeaf = true;
         rb = GetComponent<Rigidbody>();
         LR = GetComponent<LineRenderer>();
         originalCol = LR.material.color;
+        
     }
 
     // Update is called once per frame
@@ -29,8 +32,12 @@ public class RigidBodyOverride : MonoBehaviour
         Vector3 tempVel = rb.velocity;
         Vector3 tempAngVel = rb.angularVelocity;
         rb.angularVelocity = new Vector3(0, tempAngVel.y, 0);
+ 
         rb.velocity = new Vector3(tempVel.x, tempVel.y, 0);
-
+        if (isLeaf)
+        {
+           // transform.rotation = Quaternion.Euler(90, transform.rotation.eulerAngles.y, 0);
+        }
         if (isBroken) fadeOut();
 
     }

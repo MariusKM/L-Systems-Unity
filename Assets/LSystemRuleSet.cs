@@ -57,7 +57,7 @@ public class LSystemRuleSet
 
             case LSystemType.FracatalTree:
                 rules.Add('1', "11");
-                rules.Add('0', " 1[0]0");
+                rules.Add('0', "1[0]0");
                 this.axiom = "0";
                 this.angle = 45;
                 break;

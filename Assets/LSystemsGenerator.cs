@@ -14,8 +14,8 @@ public class LSystemsGenerator : MonoBehaviour
     public int iterations;
     public float stepLength, scalefac;
     private float angle;
-    public Material branchMaterial;
-    public Sprite leafSprite;
+    public Material branchMaterial, leafMaterial;
+    public GameObject leafPrefab;
     private Stack<TransformInfo> transformStack = new Stack<TransformInfo>();
     private bool generateSystem = false;
     private bool isGenerating = false;
@@ -102,15 +102,33 @@ public class LSystemsGenerator : MonoBehaviour
 
     void createLeaf(Vector3 endPos)
     {
-        GameObject go = new GameObject();
-        go.transform.position = endPos;
-        Vector3 scale = go.transform.localScale * 1.5f;
-        go.transform.localScale = scale;
-        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = leafSprite;
-        Color srCol = new Color();
-        ColorUtility.TryParseHtmlString("#00FAFF", out srCol);
-        sr.color = srCol;
+        GameObject leaf = GameObject.Instantiate(leafPrefab);
+        leaf.transform.position = endPos;
+        leaf.transform.position = transform.position;
+        leaf.transform.parent = currentNode.transform;
+        leaf.transform.rotation = transform.rotation;
+        leaf.transform.localScale = Vector3.one * 0.1f;
+        leaf.tag = "Leaf";
+        scaleLeaf(leaf);
+        allObjects.Add(leaf.GetComponent<TransformInfo>());
+ 
+    }
+
+    private void scaleLeaf(GameObject leaf)
+    {
+        ArrayList leafLRs = new ArrayList();
+        leafLRs.AddRange(leaf.GetComponentsInChildren<LineRenderer>());
+
+        foreach (LineRenderer lr in leafLRs)
+        {
+            
+            float originalWidth = lr.GetComponent<TransformInfo>().nodeWidth;
+            float newWidth = leaf.transform.localScale.x * originalWidth;
+            Debug.Log(newWidth);
+            lr.SetWidth(newWidth, newWidth);
+        }
+      
+
     }
 
     private void sortPoints()
@@ -197,6 +215,7 @@ public class LSystemsGenerator : MonoBehaviour
                     float nodeLenFac = (t.nodeLength / maxLength);
                     float nodeWdithFac = (t.nodeWidth / maxWidth);
                     rB.mass = (nodeLenFac + nodeWdithFac) / (maxMass * 2) / 10;
+                    if (t.gameObject.tag == "Leaf") rB.mass *= 0.01f;
                     hingeJoint.connectedBody = (g.transform.parent.GetComponent<Rigidbody>() == null) ? g.transform.parent.transform.parent.GetComponent<Rigidbody>() : g.transform.parent.GetComponent<Rigidbody>();
                 }
 
@@ -278,12 +297,13 @@ public class LSystemsGenerator : MonoBehaviour
 
         // Set up game object with mesh;
         GameObject GO = new GameObject();
+        GO.transform.position = GO.transform.position - new Vector3(0, 0.06f, 0);
         GO.transform.parent = currentNode.transform;
         GO.name = "LeafMesh";
         GO.AddComponent(typeof(MeshRenderer));
         MeshFilter filter = GO.AddComponent(typeof(MeshFilter)) as MeshFilter;
         MeshRenderer mR = GO.GetComponent<MeshRenderer>();
-        mR.material = branchMaterial;
+        mR.material = leafMaterial;
         filter.sharedMesh = msh;
         GO.AddComponent<SerializeMesh>();
         /*  ObjExporter.MeshToFile(filter, "Assets/Prefabs/Meshes/"+generatedObject.name+".obj");
@@ -316,7 +336,7 @@ public class LSystemsGenerator : MonoBehaviour
             currentString = newString;
 
         }
-        //      Debug.Log(currentString);
+             // Debug.Log(currentString);
 
     }
 
@@ -524,7 +544,13 @@ public class LSystemsGenerator : MonoBehaviour
 
         for (int i = 0; i < currentCharacters.Length; i++)
         {
+          
+            if (currentNode == null)
+            {
+                createChildNode();
+            }
             char currentChar = currentCharacters[i];
+           // Debug.Log(currentChar);
             Vector3 initialPosition;
             TransformInfo ti;
             float rndLength;
@@ -532,52 +558,90 @@ public class LSystemsGenerator : MonoBehaviour
             switch (currentChar)
             {
                 case '0':
-                    // move forward and end in Tree;
+
+                    // move forward and end in Leaf;
+               
+                    createLeaf(transform.position);
+                    /*
+                 
                     initialPosition = transform.position;
                     rndLength = stepLength * Random.Range(0.5f, 1.0f);
                     transform.Translate(Vector3.forward * rndLength);
                     //   createBranch(initialPosition, transform.position);
-                    createLeaf(transform.position);
+                    createLeaf(transform.position);*/
 
-                    yield return new WaitForEndOfFrame();
+#if !UNITY_EDITOR
+                  
+                    yield return new WaitForFixedUpdate();
+#endif
                     break;
 
                 case '1':
 
                     // move forward
-                    initialPosition = transform.position;
                     rndLength = stepLength * Random.Range(0.5f, 1.0f);
+                    nodeLength += rndLength;
                     transform.Translate(Vector3.forward * rndLength);
-                    //createBranch(initialPosition, transform.position);
+                    ti = currentNode.GetComponent<TransformInfo>();
+                    ti.endPoint = transform.position;
+                    ti.nodeLength = nodeLength;
+                    createBranch(transform.position);
 
-                    yield return new WaitForEndOfFrame();
+#if !UNITY_EDITOR
+                  
+                    yield return new WaitForFixedUpdate();
+#endif
 
                     break;
 
 
 
                 case '[':
-                    ti = new TransformInfo();
+                    ti = currentNode.GetComponent<TransformInfo>();
                     ti.positon = transform.position;
                     ti.rotation = transform.rotation;
+                    ti.nodeWidth = nodeWidth;
+
                     transformStack.Push(ti);
 
-                    // rotate -
+                    nodeWidth *= widthMod;
+                    createChildNode();
+
+                    // rotate -     
+                    if (nodeLength > 0)
+                    {
+                        nodeWidth *= widthMod;
+                        createChildNode();
+                    }
                     transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
+                    currentNode.transform.rotation = transform.rotation;
                     break;
 
                 case ']':
                     ti = transformStack.Pop();
+                    currentNode = ti.gameObject;
                     transform.position = ti.positon;
                     transform.rotation = ti.rotation;
+                    nodeWidth = ti.nodeWidth;
+                    nodeLength = ti.nodeLength;
                     // rotate +
+                    // rotate + 
+                    if (nodeLength > 0)
+                    {
+                        nodeWidth *= widthMod;
+                        createChildNode();
+                    }
                     transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
+                    currentNode.transform.rotation = transform.rotation;
 
                     break;
 
 
             }
         }
+#if UNITY_EDITOR
+        yield return new WaitForSeconds(0);
+#endif
         isGenerating = false;
 
     }
