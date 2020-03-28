@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
+[ExecuteInEditMode]
 public class LSystemSpawner : MonoBehaviour
 {
 
@@ -55,6 +56,26 @@ public class LSystemSpawner : MonoBehaviour
             DestroyImmediate(generatedObjects[i]);
         }
         generatedObjects = null;
+    }
+
+
+
+
+    public void fitToGroundPlane()
+    {
+        foreach (GameObject g in generatedObjects)
+        {
+            RaycastHit hit;
+            Collider col = g.GetComponent<Collider>();
+            Ray ray = new Ray(g.transform.position, Vector3.down);
+            if (Physics.Raycast(ray, out hit, 10000))
+            {
+                g.transform.position = hit.point;
+            }
+                //col.Raycast(ray, out hit, 10);
+           
+        }
+
     }
     // Update is called once per frame
     public void Spawn()

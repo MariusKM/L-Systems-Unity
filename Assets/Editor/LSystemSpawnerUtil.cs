@@ -16,7 +16,10 @@ public class LSystemSpawnerUtil : Editor
         {
             myScript.Init();
         }
-
+        if (GUILayout.Button("Fit to Ground Plane"))
+        {
+            myScript.fitToGroundPlane();
+        }
         if (GUILayout.Button("Clear Objects"))
         {
             myScript.Clear();
