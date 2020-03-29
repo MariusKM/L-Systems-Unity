@@ -1,14 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
+using System;
 
 public class LSystemRuleSet 
 {
     private Dictionary<char, string> rules = new Dictionary<char, string>();
     private string axiom;
     private float angle;
-
-
+    private List<char> parametricChar = new List<char>();
+    private List<char> parametricOffset = new List<char>();
+ 
     public enum LSystemType
     {
         Algae,
@@ -18,10 +21,38 @@ public class LSystemRuleSet
         FractalBush,
         Weed,
         Leaf,
-        Sticks
+        Sticks,
+        Parametric
 
     }
 
+    [Serializable]
+    public class ParametricModule
+    {
+
+        public char moduleIdentifier;
+        public bool hasParam = false;
+        public float parameter;
+
+        public ParametricModule(char moduleIdentifier, float paramVal, bool hasParam)
+        {
+            this.moduleIdentifier = moduleIdentifier;
+            this.hasParam = hasParam;
+            this.parameter = paramVal;
+        
+       
+        }
+
+    }
+    /*L(g)
+     * F+[-L+[+L(g+1)+
+     * f
+     * +
+     * [-L(g+1)
+     * +
+     * [+L(g+1)
+     * +
+     */
 
     public Dictionary<char, string> getRules()
     {
@@ -31,6 +62,10 @@ public class LSystemRuleSet
     public string getAxiom()
     {
         return this.axiom;
+    }
+    public List<char> getParametricChars()
+    {
+        return this.parametricChar;
     }
 
     public float getAngle()
@@ -60,6 +95,15 @@ public class LSystemRuleSet
                 rules.Add('0', "1[0]0");
                 this.axiom = "0";
                 this.angle = 45;
+                break;
+
+            case LSystemType.Parametric:
+                this.axiom = "L";
+                rules.Add('L', "F[-L][+L]");
+                parametricChar.Add('-');
+                parametricChar.Add('+');
+                parametricChar.Add('F');
+                this.angle = 10;
                 break;
 
             case LSystemType.Plant:

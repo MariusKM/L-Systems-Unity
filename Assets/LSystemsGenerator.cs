@@ -29,17 +29,13 @@ public class LSystemsGenerator : MonoBehaviour
     public float widthMod = 0.75f;
     private float nodeWidth;
 
+    public List<LSystemRuleSet.ParametricModule> modules = new List<LSystemRuleSet.ParametricModule>();
+    public List<char> parametricChar = new List<char>();
     private Vector3 startPos;
     private bool isleaf = false;
     [HideInInspector]
     public GameObject generatedObject;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        //  Init();
-    }
-
+    string newString = "";
     public void Init()
     {
         currentNode = null;
@@ -51,6 +47,7 @@ public class LSystemsGenerator : MonoBehaviour
         rules = ruleSet.getRules();
         axiom = ruleSet.getAxiom();
         angle = ruleSet.getAngle();
+        parametricChar = ruleSet.getParametricChars();
         currentString = axiom;
         nodeWidth = branchWidth * Random.Range(0.75f, 1);
         Generate();
@@ -60,6 +57,8 @@ public class LSystemsGenerator : MonoBehaviour
 
     private void Reset()
     {
+        modules.Clear();
+        parametricChar.Clear();
         nodeCounter = 0;
         nodeLength = 0;
         nodeWidth = 0;
@@ -111,7 +110,7 @@ public class LSystemsGenerator : MonoBehaviour
         leaf.tag = "Leaf";
         scaleLeaf(leaf);
         allObjects.Add(leaf.GetComponent<TransformInfo>());
- 
+
     }
 
     private void scaleLeaf(GameObject leaf)
@@ -121,13 +120,13 @@ public class LSystemsGenerator : MonoBehaviour
 
         foreach (LineRenderer lr in leafLRs)
         {
-            
+
             float originalWidth = lr.GetComponent<TransformInfo>().nodeWidth;
             float newWidth = leaf.transform.localScale.x * originalWidth;
-            Debug.Log(newWidth);
+
             lr.SetWidth(newWidth, newWidth);
         }
-      
+
 
     }
 
@@ -202,12 +201,12 @@ public class LSystemsGenerator : MonoBehaviour
                 g.AddComponent<RigidBodyOverride>();
                 if (g == generatedObject)
                 {
-                         
+
                     maxMass = rB.mass;
                     maxLength = t.nodeLength;
                     maxWidth = t.nodeWidth;
                     hingeJoint.connectedBody = groundPlane.GetComponent<Rigidbody>();
-                
+
 
                 }
                 else
@@ -224,7 +223,7 @@ public class LSystemsGenerator : MonoBehaviour
                 rB.drag = 1;
                 hingeJoint.anchor = Vector3.zero;
                 hingeJoint.axis = Vector3.up;
-              
+
                 hingeJoint.useSpring = false;
                 JointSpring jointSpring = new JointSpring();
                 jointSpring.spring = 0.1f;
@@ -336,29 +335,79 @@ public class LSystemsGenerator : MonoBehaviour
             currentString = newString;
 
         }
-             // Debug.Log(currentString);
+      //  Debug.Log(currentString);
+    }
+
+    void processStringParametric()
+    {
+
+        newString = "";
+        char[] currentStringChar = currentString.ToCharArray();
+        int param = 0;
+       
+        processModules(currentStringChar, param, iterations);
+        currentString = newString;
+
+
+        Debug.Log(currentString);
+     
+
+
 
     }
 
-    private void FixedUpdate()
+    void createModulesFromString(char[] inputChar, int param)
     {
-        if (generateSystem)
+      
+        foreach (char c in inputChar)
         {
-            if (!isGenerating)
-            {
-                Generate();
-            }
-            generateSystem = false;
-
+            LSystemRuleSet.ParametricModule module = new LSystemRuleSet.ParametricModule(c, param, parametricChar.Contains(c));
+            modules.Add(module);
         }
     }
+
+
+    void processModules(char[] currentStringChar, int param, int iteration)
+    {
+        int paramoffset = 1;
+        iteration--;
+        if (iteration < 0)
+        {
+            createModulesFromString(currentStringChar, param - paramoffset);
+            return;
+
+        }
+   
+        for (int i = 0; i < currentStringChar.Length; i++)
+        {
+
+            char currentChar = currentStringChar[i];
+            if (rules.ContainsKey(currentChar))
+            {
+                string ruleString = rules[currentChar];
+                newString += ruleString;
+                processModules(ruleString.ToCharArray(), param+paramoffset, iteration);
+
+            }
+            else
+            {
+                newString += currentChar.ToString();
+                LSystemRuleSet.ParametricModule module = new LSystemRuleSet.ParametricModule(currentChar, iteration, parametricChar.Contains(currentChar));
+                modules.Add(module);
+            }
+        }
+    }
+
+
 
     void Generate()
     {
 
 
         isGenerating = true;
-        processString();
+      
+        if (systemType == LSystemRuleSet.LSystemType.Parametric) processStringParametric();
+        else processString();
         char[] currentCharacters = currentString.ToCharArray();
         switch (systemType)
         {
@@ -385,6 +434,10 @@ public class LSystemsGenerator : MonoBehaviour
                 break;
             case LSystemRuleSet.LSystemType.Sticks:
                 StartCoroutine(generatePlant(currentCharacters));
+                break;
+
+            case LSystemRuleSet.LSystemType.Parametric:
+                StartCoroutine(generateParametricTree());
                 break;
 
         }
@@ -544,13 +597,13 @@ public class LSystemsGenerator : MonoBehaviour
 
         for (int i = 0; i < currentCharacters.Length; i++)
         {
-          
+
             if (currentNode == null)
             {
                 createChildNode();
             }
             char currentChar = currentCharacters[i];
-           // Debug.Log(currentChar);
+            // Debug.Log(currentChar);
             Vector3 initialPosition;
             TransformInfo ti;
             float rndLength;
@@ -560,7 +613,7 @@ public class LSystemsGenerator : MonoBehaviour
                 case '0':
 
                     // move forward and end in Leaf;
-               
+
                     createLeaf(transform.position);
                     /*
                  
@@ -646,12 +699,121 @@ public class LSystemsGenerator : MonoBehaviour
 
     }
 
-    /* public class V3C : IComparer<Vector3>
-     {
-         public int Compare(Vector3 x, Vector3 y)
-         {
+    IEnumerator generateParametricTree()
+    {
+
+        foreach (LSystemRuleSet.ParametricModule m in modules)
+        {
+            if (currentNode == null)
+            {
+                createChildNode();
+            }
+
+            Vector3 initialPosition;
+            TransformInfo ti;
+            float rndLength, newAng;
+
+            char currentChar = m.moduleIdentifier;
+
+            Debug.Log(currentChar);
+
+            switch (currentChar)
+            {
+                case '0':
+
+                    // move forward and end in Leaf;
+
+                    createLeaf(transform.position);
+                    /*
+                 
+                    initialPosition = transform.position;
+                    rndLength = stepLength * Random.Range(0.5f, 1.0f);
+                    transform.Translate(Vector3.forward * rndLength);
+              */
+
+#if !UNITY_EDITOR
+                  
+                    yield return new WaitForFixedUpdate();
+#endif
+                    break;
+
+                case 'F':
+
+                    // move forward
+                    rndLength = stepLength * ((m.hasParam) ? 1 + (m.parameter / 10) : 1);
+                    nodeLength += rndLength;
+                    transform.Translate(Vector3.forward * rndLength);
+                    ti = currentNode.GetComponent<TransformInfo>();
+                    ti.endPoint = transform.position;
+                    ti.nodeLength = nodeLength;
+                    createBranch(transform.position);
+
+#if !UNITY_EDITOR
+                  
+                    yield return new WaitForFixedUpdate();
+#endif
+
+                    break;
+
+                case '-':
+                    // rotate -         
+                    if (nodeLength > 0)
+                    {
+                        nodeWidth *= widthMod;
+                        createChildNode();
+                    }
+                    newAng = -angle * ((m.hasParam) ? 1 + (m.parameter / 10) : 1);
+                    transform.Rotate(Vector3.up * newAng);
+                    // transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
+                    currentNode.transform.rotation = transform.rotation;
+                    break;
+
+                case '+':
+
+                    // rotate + 
+                    if (nodeLength > 0)
+                    {
+                        nodeWidth *= widthMod;
+                        createChildNode();
+                    }
+                    newAng = angle * ((m.hasParam) ? 1 + (m.parameter / 10) : 1);
+                    transform.Rotate(Vector3.up * newAng);
+                    //transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
+                    currentNode.transform.rotation = transform.rotation;
+
+                    break;
+
+                case '[':
+                    ti = currentNode.GetComponent<TransformInfo>();
+                    ti.positon = transform.position;
+                    ti.rotation = transform.rotation;
+                    ti.nodeWidth = nodeWidth;
+
+                    transformStack.Push(ti);
+
+                    nodeWidth *= widthMod;
+                    createChildNode();
+                    break;
+
+                case ']':
+                    ti = transformStack.Pop();
+                    currentNode = ti.gameObject;
+                    transform.position = ti.positon;
+                    transform.rotation = ti.rotation;
+                    nodeWidth = ti.nodeWidth;
 
 
-         }
-     }*/
+
+                    break;
+
+
+            }
+        }
+
+#if UNITY_EDITOR
+        yield return new WaitForSeconds(0);
+#endif
+        isGenerating = false;
+
+    }
 }
