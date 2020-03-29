@@ -99,8 +99,9 @@ public class LSystemRuleSet
 
             case LSystemType.Parametric:
                 this.axiom = "L";
-                rules.Add('L', "F[-L][+L]");
+                rules.Add('L', "F[-L0][+L0]");
                 parametricChar.Add('-');
+                parametricChar.Add('0');
                 parametricChar.Add('+');
                 parametricChar.Add('F');
                 this.angle = 10;

@@ -16,6 +16,7 @@ public class LSystemsGenerator : MonoBehaviour
     private float angle;
     public Material branchMaterial, leafMaterial;
     public GameObject leafPrefab;
+    public float leafSize = 0.1f;
     private Stack<TransformInfo> transformStack = new Stack<TransformInfo>();
     private bool generateSystem = false;
     private bool isGenerating = false;
@@ -28,7 +29,6 @@ public class LSystemsGenerator : MonoBehaviour
     public float branchWidth = 0.05f;
     public float widthMod = 0.75f;
     private float nodeWidth;
-
     public List<LSystemRuleSet.ParametricModule> modules = new List<LSystemRuleSet.ParametricModule>();
     public List<char> parametricChar = new List<char>();
     private Vector3 startPos;
@@ -106,7 +106,7 @@ public class LSystemsGenerator : MonoBehaviour
         leaf.transform.position = transform.position;
         leaf.transform.parent = currentNode.transform;
         leaf.transform.rotation = transform.rotation;
-        leaf.transform.localScale = Vector3.one * 0.1f;
+        leaf.transform.localScale = Vector3.one * leafSize;
         leaf.tag = "Leaf";
         scaleLeaf(leaf);
         allObjects.Add(leaf.GetComponent<TransformInfo>());
@@ -722,7 +722,13 @@ public class LSystemsGenerator : MonoBehaviour
                 case '0':
 
                     // move forward and end in Leaf;
-
+                    if (m.hasParam)
+                    {
+                        if (m.parameter < 3)
+                        {
+                            break;
+                        }
+                    }
                     createLeaf(transform.position);
                     /*
                  
