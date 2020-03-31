@@ -14,6 +14,9 @@ public class LSystemsGenerator : MonoBehaviour
     public int iterations;
     public float stepLength, scalefac;
     private float angle;
+    public bool isRandom, useNoise;
+    [Range(0.0f, 1.0f)]
+    public float RandMin, RandMax;
     public Material branchMaterial, leafMaterial;
     public GameObject leafPrefab;
     public float leafSize = 0.1f;
@@ -197,7 +200,7 @@ public class LSystemsGenerator : MonoBehaviour
             if (t.nodeLength > 0)
             {
                 Rigidbody rB = g.AddComponent<Rigidbody>();
-                HingeJoint hingeJoint = g.AddComponent<HingeJoint>();
+               // HingeJoint hingeJoint = g.AddComponent<HingeJoint>();
                 g.AddComponent<RigidBodyOverride>();
                 if (g == generatedObject)
                 {
@@ -205,7 +208,7 @@ public class LSystemsGenerator : MonoBehaviour
                     maxMass = rB.mass;
                     maxLength = t.nodeLength;
                     maxWidth = t.nodeWidth;
-                    hingeJoint.connectedBody = groundPlane.GetComponent<Rigidbody>();
+                //    hingeJoint.connectedBody = groundPlane.GetComponent<Rigidbody>();
 
 
                 }
@@ -215,13 +218,13 @@ public class LSystemsGenerator : MonoBehaviour
                     float nodeWdithFac = (t.nodeWidth / maxWidth);
                     rB.mass = (nodeLenFac + nodeWdithFac) / (maxMass * 2) / 10;
                     if (t.gameObject.tag == "Leaf") rB.mass *= 0.01f;
-                    hingeJoint.connectedBody = (g.transform.parent.GetComponent<Rigidbody>() == null) ? g.transform.parent.transform.parent.GetComponent<Rigidbody>() : g.transform.parent.GetComponent<Rigidbody>();
+                  //  hingeJoint.connectedBody = (g.transform.parent.GetComponent<Rigidbody>() == null) ? g.transform.parent.transform.parent.GetComponent<Rigidbody>() : g.transform.parent.GetComponent<Rigidbody>();
                 }
 
                 rB.useGravity = false;
                 rB.angularDrag = 0.5f;
                 rB.drag = 1;
-                hingeJoint.anchor = Vector3.zero;
+              /*  hingeJoint.anchor = Vector3.zero;
                 hingeJoint.axis = Vector3.up;
 
                 hingeJoint.useSpring = false;
@@ -242,7 +245,8 @@ public class LSystemsGenerator : MonoBehaviour
                 limits.bounceMinVelocity = 0.1f;
                 limits.contactDistance = 5f;
                 hingeJoint.enableCollision = false;
-                hingeJoint.limits = limits;
+                hingeJoint.limits = limits;*/
+            
             }
 
 
@@ -392,7 +396,7 @@ public class LSystemsGenerator : MonoBehaviour
             else
             {
                 newString += currentChar.ToString();
-                LSystemRuleSet.ParametricModule module = new LSystemRuleSet.ParametricModule(currentChar, iteration, parametricChar.Contains(currentChar));
+                LSystemRuleSet.ParametricModule module = new LSystemRuleSet.ParametricModule(currentChar, param, parametricChar.Contains(currentChar));
                 modules.Add(module);
             }
         }
@@ -492,15 +496,16 @@ public class LSystemsGenerator : MonoBehaviour
             //  Debug.Log(currentChar);
 
             TransformInfo ti;
-            float rndLength = 0;
+            float rand = 1;
             switch (currentChar)
             {
                 case 'F':
                     // move forward
-                    rndLength = stepLength * Random.Range(0.5f, 1.0f);
+                    if (isRandom) rand = stepLength * Random.Range(RandMin, RandMax);
+                    else rand = stepLength;
 
-                    nodeLength += rndLength;
-                    transform.Translate(Vector3.forward * rndLength);
+                    nodeLength += rand;
+                    transform.Translate(Vector3.forward * rand);
                     //  transform.position = new Vector3(transform.position.x, transform.position.y, startPos.z);
                     ti = currentNode.GetComponent<TransformInfo>();
                     ti.endPoint = transform.position;
@@ -511,6 +516,16 @@ public class LSystemsGenerator : MonoBehaviour
                     yield return new WaitForFixedUpdate();
 #endif
 
+                    break;
+
+                case '0':
+
+                    createLeaf(transform.position);
+
+#if !UNITY_EDITOR
+                  
+                    yield return new WaitForFixedUpdate();
+#endif
                     break;
 
                 /*  case 'f':
@@ -537,7 +552,19 @@ public class LSystemsGenerator : MonoBehaviour
                         nodeWidth *= widthMod;
                         createChildNode();
                     }
-                    transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
+                    if (isRandom)
+                    {
+                        if (useNoise)
+                        {
+                            rand = Mathf.PerlinNoise(currentNode.transform.position.x, currentNode.transform.position.y);
+                            // rand = Mathf.PerlinNoise(m.parameter, 0);
+                        }
+                        else
+                        {
+                            rand = Random.Range(RandMin, RandMax);
+                        }
+                    }
+                    transform.Rotate(Vector3.up * (-angle * rand));
                     currentNode.transform.rotation = transform.rotation;
                     break;
 
@@ -548,7 +575,20 @@ public class LSystemsGenerator : MonoBehaviour
                         nodeWidth *= widthMod;
                         createChildNode();
                     }
-                    transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
+
+                    if (isRandom)
+                    {
+                        if (useNoise)
+                        {
+                            rand = Mathf.PerlinNoise(currentNode.transform.position.x, currentNode.transform.position.y);
+                            // rand = Mathf.PerlinNoise(m.parameter, 0);
+                        }
+                        else
+                        {
+                            rand = Random.Range(RandMin, RandMax);
+                        }
+                    }
+                    transform.Rotate(Vector3.up * (angle * rand));
                     currentNode.transform.rotation = transform.rotation;
                     break;
 
@@ -712,8 +752,11 @@ public class LSystemsGenerator : MonoBehaviour
             Vector3 initialPosition;
             TransformInfo ti;
             float rndLength, newAng;
+            float rand;
 
             char currentChar = m.moduleIdentifier;
+
+            currentNode.GetComponent<TransformInfo>().param = m.parameter;
 
             Debug.Log(currentChar);
 
@@ -745,8 +788,11 @@ public class LSystemsGenerator : MonoBehaviour
 
                 case 'F':
 
+                    rand = 1;
                     // move forward
-                    rndLength = stepLength * ((m.hasParam) ? 1 + (m.parameter / 10) : 1);
+                    if (isRandom) rand = Random.Range(RandMin, RandMax);
+
+                    rndLength = stepLength * ((m.hasParam) ? 1 + (m.parameter / 10) * rand : 1);
                     nodeLength += rndLength;
                     transform.Translate(Vector3.forward * rndLength);
                     ti = currentNode.GetComponent<TransformInfo>();
@@ -762,13 +808,27 @@ public class LSystemsGenerator : MonoBehaviour
                     break;
 
                 case '-':
+                    rand = 1;
                     // rotate -         
                     if (nodeLength > 0)
                     {
                         nodeWidth *= widthMod;
                         createChildNode();
                     }
-                    newAng = -angle * ((m.hasParam) ? 1 + (m.parameter / 10) : 1);
+                    if (isRandom)
+                    {
+                        if (useNoise)
+                        {
+                            rand = Mathf.PerlinNoise(currentNode.transform.position.x, currentNode.transform.position.y);
+                            // rand = Mathf.PerlinNoise(m.parameter, 0);
+                        }
+                        else
+                        {
+                            rand = Random.Range(RandMin, RandMax);
+                        }
+                    }
+
+                    newAng = -angle * ((m.hasParam) ? 1 + (m.parameter * rand) : 1);
                     transform.Rotate(Vector3.up * newAng);
                     // transform.Rotate(Vector3.up * (-angle * Random.Range(0.9f, 1.0f)));
                     currentNode.transform.rotation = transform.rotation;
@@ -776,13 +836,27 @@ public class LSystemsGenerator : MonoBehaviour
 
                 case '+':
 
+                    rand = 1;
                     // rotate + 
                     if (nodeLength > 0)
                     {
                         nodeWidth *= widthMod;
                         createChildNode();
                     }
-                    newAng = angle * ((m.hasParam) ? 1 + (m.parameter / 10) : 1);
+                    if (isRandom)
+                    {
+                        if (useNoise)
+                        {
+                            rand = Mathf.PerlinNoise(currentNode.transform.position.x, currentNode.transform.position.y);
+                            // rand = Mathf.PerlinNoise(m.parameter, 0);
+                        }
+                        else
+                        {
+                            rand = Random.Range(RandMin, RandMax);
+                        }
+                    }
+
+                    newAng = angle * ((m.hasParam) ? 1 + (m.parameter * rand) : 1);
                     transform.Rotate(Vector3.up * newAng);
                     //transform.Rotate(Vector3.up * (angle * Random.Range(0.9f, 1.0f)));
                     currentNode.transform.rotation = transform.rotation;

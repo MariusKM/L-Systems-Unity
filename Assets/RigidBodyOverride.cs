@@ -55,11 +55,15 @@ public class RigidBodyOverride : MonoBehaviour
     void OnJointBreak(float breakForce)
     {
         Debug.Log("A joint has just been broken!, force: " + breakForce);
-        if (!transform.parent.GetComponent<FractalWindZone>())
+        if (transform.parent)
         {
-            isBroken = true;
-            transform.parent = null;
+            if (!transform.parent.GetComponent<FractalWindZone>())
+            {
+                isBroken = true;
+                transform.parent = null;
+            }
         }
+       
         rb.angularDrag = 0.1f;
         rb.drag = 0.1f;
         rb.useGravity = true;

@@ -8,6 +8,8 @@ public class TransformInfo : MonoBehaviour
     public Quaternion rotation;
     public float nodeWidth, nodeLength;
     public Vector3 endPoint;
+    public float param;
+    public int animationID = 0;
 
     public class TIC : IComparer<TransformInfo>
     {
